@@ -1,32 +1,45 @@
-import dotenv from "dotenv";
-import connectDB from "./db/index.js";
+import dotenv from 'dotenv';
+import express from 'express';
+import connectDB from './db/index.js';
 
-
-
+// Initialize dotenv
 dotenv.config({
-    path: './env'
+  path: '.env'
 });
 
+const app = express();
 
-connectDB();
+// Connect to the database
+connectDB()
+  .then(() => {
+    app.listen(process.env.PORT || 8080, () => {
+      console.log(`Server is running on port ${process.env.PORT || 8080}`);
+    });
+  })
+  .catch((err) => {
+    console.error('MONGODB connection failed !!', err);
+  });
 
+
+
+
+  
+// If you want to keep the commented-out code, make sure it's properly commented out:
 /*
-import express from "express";
-const app = express()
-
 (async () => {
-    try {
-        mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`)
-        app.on("error",  (error) => {
-            console.log("ERRR: ", error);
-            throw error
-        })
-        app.listen(process.env.PORT,() => {
-            console.log(`Server is running on port ${process.env.PORT}`)
-        })
-    }catch (error){
-        console.error("ERROR: ",error)
-        throw err
-    }
-})()
-*/    
+  try {
+    await mongoose.connect(`process.env.MONGODB_URI/${DB_NAME}`);
+    app.on('error', (err) => {
+      console.log('ERROR:', err);
+      throw err;
+    });
+
+    app.listen(process.env.PORT, () => {
+      console.log(`Server is running on port ${process.env.PORT}`);
+    });
+  } catch (error) {
+    console.error('ERROR:', error);
+    throw error;
+  }
+})();
+*/
