@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerUser, loginUser, logoutUser,refershAccessToken} from "../controllers/user.controller.js"; // Ensure all required controllers are imported
+import { registerUser, loginUser, logoutUser, refershAccessToken } from "../controllers/user.controller.js"; // Ensure all required controllers are imported
 import { upload } from "../middlewares/multer.middleware.js"; // Multer middleware for file uploads
 import { verifyJWT } from "../middlewares/auth.middleware.js"; // Middleware to verify JWT
 
@@ -20,6 +20,7 @@ router.route("/login").post(loginUser);
 // Secured route for user logout
 router.route("/logout").post(verifyJWT, logoutUser);
 
+// Route for refreshing access token
 router.route("/refresh-token").post(refershAccessToken);
 
 export default router;

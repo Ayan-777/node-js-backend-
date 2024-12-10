@@ -4,16 +4,16 @@ import {User} from "../models/user.model.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 
-const generateAccessAndRereshTokens = async (userId) =>{
+const generateAccessAndRefreshTokens = async (userId) => {
     try {
-        const user = await User.findById(userId)
-        const accessToken = user.generateAccessToken()
-        const refreshToken = user.generateRefreshToken()
+        const user = await User.findById(userId);
+        const accessToken = user.generateAccessToken();
+        const refreshToken = user.generateRefreshToken();
 
-    user.refreshToken = refreshToken
-    await user.save({validateBeforeSava: false})  
-    
-    return {accessToken, refreshToken}
+        user.refreshToken = refreshToken;
+        await user.save({ validateBeforeSave: false });
+
+        return { accessToken, refreshToken };
 
     } catch (error) {
         throw new ApiError(500, "Something went wrong while genrating refersh and access token")
@@ -113,7 +113,7 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     // Generate tokens
-    const { accessToken, refreshToken } = generateAccessAndRereshTokens(user._id); // Ensure this function works as expected
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id); // Ensure this function works as expected
 
     // Retrieve user data without sensitive fields
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
@@ -186,12 +186,12 @@ const refershAccessToken = asyncHandler(async (req, res) => {
         throw new ApiError (401, "unauthorized request")
     }
 
-   try {
+    try {
      const decodedToken = Jwt.verify(
          incomingRefreshToken,
          process.env.REFRESH_TOKEN_SECRET
      )
- 
+
      const user = await User.findById(decodedToken?._id)
  
      if (!user) {
@@ -205,13 +205,13 @@ const refershAccessToken = asyncHandler(async (req, res) => {
      const options = {
          httpOnly : true,
          secure: true
-     }
- 
+        }
+
      const {accessToken, newRefreshToken} = await
-     generateAccessAndRereshTokens(user._id)
- 
-     return res
-     .status(200)
+     generateAccessAndRefreshTokens(user._id)
+
+        return res
+            .status(200)
      .cookie("accessToken", accessToken, options)
      .cookie("refreshToken",newRefreshToken, options)
      .json(
@@ -221,10 +221,10 @@ const refershAccessToken = asyncHandler(async (req, res) => {
              "Access token refreshed"
          )
      )
-   } catch (error) {
-    throw new ApiError(401, error?.message || "Invalid refresh token")
-   }
-})
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Invalid refresh token");
+    }
+});
 
 export {
     registerUser,
