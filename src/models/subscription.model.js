@@ -1,4 +1,4 @@
-import { channel, subscribe } from "diagnostics_channel"
+
 import mongoose, {Schema} from "mongoose"
 
 const subsciptionSchema = new Schema({
