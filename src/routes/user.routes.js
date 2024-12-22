@@ -3,7 +3,7 @@ import {
   registerUser,
    loginUser,
     logoutUser, 
-    refershAccessToken, 
+    refreshAccessToken, 
     changeCurrentPassword, 
     getCurrentUser, 
     updateAccountDetails, 
@@ -33,7 +33,7 @@ router.route("/login").post(loginUser);
 router.route("/logout").post(verifyJWT, logoutUser);
 
 // Route for refreshing access token
-router.route("/refresh-token").post(refershAccessToken);
+router.route("/refresh-token").post(refreshAccessToken);
 
 router.route("/change-password").post(verifyJWT,changeCurrentPassword);
 

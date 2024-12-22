@@ -180,7 +180,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     }
 });
 
-const refershAccessToken = asyncHandler(async (req, res) => {
+const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req.cookies.
     refreshToken || req.body.refreshToken
 
@@ -336,51 +336,53 @@ const updateUserCoverImage = asyncHandler(async(req, res) => {
     )
 });
 
-const getUserChannelProfile = asyncHandler(async(req, res) => {
-    const {username} = req.params
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+    const { username } = req.params;
 
+    // Validate username
     if (!username?.trim()) {
-        throw new ApiError(400, "username is missing")
+        throw new ApiError(400, "username is missing");
     }
-    
+
+    // Perform aggregation
     const channel = await User.aggregate([
         {
             $match: {
-                username: username?.toLowerCase()
-            }
+                username: username.toLowerCase(), // Ensure case-insensitive matching
+            },
         },
         {
             $lookup: {
                 from: "subscriptions",
                 localField: "_id",
                 foreignField: "channel",
-                as: "subscribers"
-            }
+                as: "subscribers",
+            },
         },
         {
             $lookup: {
                 from: "subscriptions",
                 localField: "_id",
                 foreignField: "subscriber",
-                as: "subscribedTo"
-            }
+                as: "subscribedTo",
+            },
         },
         {
             $addFields: {
                 subscribersCount: {
-                    $size: "$subscribers"
+                    $size: "$subscribers",
                 },
                 channelsSubscribedToCount: {
-                    $size: "$subscribedTo"
+                    $size: "$subscribedTo",
                 },
                 isSubscribed: {
                     $cond: {
-                        if: {$in: [req.user?._id, "$subscribers.subscriber"]},
+                        if: { $in: [req.user?._id, "$subscribers.subscriber"] },
                         then: true,
-                        else: false
-                    }
-                }
-            }
+                        else: false,
+                    },
+                },
+            },
         },
         {
             $project: {
@@ -391,22 +393,26 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
                 isSubscribed: 1,
                 avatar: 1,
                 coverImage: 1,
-                email: 1
+                email: 1,
+            },
+        },
+    ]);
 
-            }
-        }
-    ])
-
+    // Check if channel exists
     if (!channel?.length) {
-        throw new ApiError(404, "channel does not exists")
+        throw new ApiError(404, "channel does not exist");
     }
 
+    // Log result for debugging
+    //console.log("Fetched Channel: ", channel);
+
+    // Return success response
     return res
-    .status(200)
-    .json(
-        new ApiResponse(200, channel[0], "User channel fetched successfully")
-    )
-})
+        .status(200)
+        .json(
+            new ApiResponse(200, channel[0], "User channel fetched successfully")
+        );
+});
 
 const getWatchHistory = asyncHandler (async(req, res) => {
     const user = await User.aggregate([
@@ -467,7 +473,7 @@ export {
     registerUser, 
     loginUser,
     logoutUser,
-    refershAccessToken,
+    refreshAccessToken,
     changeCurrentPassword,
     getCurrentUser,
     updateAccountDetails,
